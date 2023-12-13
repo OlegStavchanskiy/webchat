@@ -1,0 +1,13 @@
+<ul>
+    {% for message in messages %}
+                        <li class="me"> <!-- Тут обрати внимание, с этого момента начинается само сообщение пользователя -->
+                  <div class="name">
+                    <span class="">{{z.user.first_name}}</span>
+                  </div>
+                  <div class="message">
+                    <p>{{z.content}}</p>
+                      <span class="msg-time">{{ z.timestamp|date:"Y-m-d H:i:s" }}</span>
+                  </div>
+                </li> <!-- На этом моменте оно заканчивается -->
+    {% endfor %}
+</ul>

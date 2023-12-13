@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main</title>
+<link rel="stylesheet" href="{% static 'styles/style.css' %}">
+
+
+    <script src="https://kit.fontawesome.com/cf360ade9b.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="{% static 'styles/font/css/fontawesome.css' %}">
+<link rel="stylesheet" href="{% static 'styles/font/css/fontawesome.min.css' %}">
+    <style>
+      .chat-area {
+    border-top: 1px solid #cfdae1;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 176px;
+    right: 175px;
+    box-shadow: inset 0 1px 3px rgba(207, 218, 225, 0.42);
+    overflow: hidden;  /* Добавьте это свойство, чтобы скрывать содержимое, выходящее за пределы */
+}
+
+.chat-list {
+    border-top: 1px solid #cfdae1;
+    border-bottom: 1px solid #cfdae1;
+    position: absolute;
+    left: 0;
+    top: 35px;
+    right: 0;
+    bottom: 44px;
+    overflow-y: auto;  /* Добавьте это свойство, чтобы включить прокрутку */
+    outline: none;
+}
+.input-area {
+    background: #e4eaee;
+    padding: 6px;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-top: 1px solid #cfdae1;
+    height: 50px;  /* Установите желаемую высоту input-area */
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="window-wrapper"> <!-- Верхнее окно с названием нашего чата -->
+      <div class="window-title">
+        <div class="title">
+          <span>Chatiks</span> 
+        </div>
+      </div>
+      <div class="window-area"> <!-- Левая область с доступными чатами -->
+        <div class="conversation-list">
+          <ul class="">
+            {% for i in chat %}
+              <li class="item active"><a href="/?chat_id={{i.id}}"><i class="fa-solid fa-users"></i><span>{{i.title}}</span></a></li>
+            {% endfor %}
+          </ul>
+          <div class="my-account"> <!-- Левая область, но она уже про аккаунт пользователя -->
+            <div class="image">
+              <img src="https://secure.gravatar.com/avatar/de76e03aa6b5b0bf675c1e8a990da52f?s=64">
+              <i class="fa fa-circle" aria-hidden="true"></i>
+            </div>
+            <div class="name">
+              <span>dearsadnezz</span>
+              <i class="fa fa-angle-down" aria-hidden="true"></i>
+              <span class="availability">В сети</span> <!-- Отвечает за онлайн пользователя -->
+            </div>
+          </div>
+        </div>
+        <div id="chat-container" class="chat-area"> <!-- Область с чатом, если добавлять сообщения, то добавится скролбар и можно будет пролистывать эту область -->
+          <div class="chat-list" id="chat-list">
+            <ul>
+              {% for z in messages %}
+                <li class="me"> <!-- Тут обрати внимание, с этого момента начинается само сообщение пользователя -->
+                  <div class="name">
+                    <span class="">{{z.user.first_name}}</span>
+                  </div>
+                  <div class="message">
+                    <p>{{z.content}}</p>
+                      <span class="msg-time">{{ z.timestamp|date:"Y-m-d H:i:s" }}</span>
+                  </div>
+                </li> <!-- На этом моменте оно заканчивается -->
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <form id="message-form" method="POST" action="{% url 'post_message' %}?chat_id={{param}}">
+            {% csrf_token %}
+            <div class="input-area"> <!-- Область с вводом сообщения, ниже также есть иконки для загрузки смайликов и тд -->
+              <div class="input-wrapper">
+                {{form.as_p}}
+                <i class="fa fa-smile-o"></i>
+                <i class="fa fa-paperclip"></i>
+              </div>
+              <button type="submit" value="Submit" class="send-btn">Submit</button>
+          </div>
+          </form>
+        <div class="right-tabs"> <!-- Правая панель с пользователями в чате, даже показывается их онлайн -->
+          <ul class="tabs-container">
+            <li class="active">
+              <ul class="member-list">
+                <li><span class="status online"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
+                <li><span class="status online"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
+                <li><span class="status offline"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
+                <li><span class="status offline"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+<script>
+    const chatList = document.getElementById('chat-list');
+    chatList.innerHTML = '';
+    // Открытие SSE-соединения
+    const eventSource = new EventSource('/get_new_messages/');
+    // Обработка событий от SSE
+    eventSource.onmessage = function (event) {
+        const newMessage = JSON.parse(event.data);
+        // Создание нового элемента сообщения
+        const messageElement = document.createElement('li');
+        messageElement.className = 'me';
+
+        const nameElement = document.createElement('div');
+        nameElement.className = 'name';
+        nameElement.innerHTML = `<span>${newMessage.user.first_name}</span>`;
+
+        const messageContentElement = document.createElement('div');
+        messageContentElement.className = 'message';
+        messageContentElement.innerHTML = `<p>${newMessage.content}</p><span class="msg-time">${newMessage.timestamp}</span>`;
+
+        messageElement.appendChild(nameElement);
+        messageElement.appendChild(messageContentElement);
+
+        // Добавление нового сообщения в список
+        chatList.appendChild(messageElement);
+    };
+</script>
+
+
+
+
+
+</html>
