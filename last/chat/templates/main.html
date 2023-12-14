@@ -18,7 +18,7 @@
     top: 0;
     bottom: 0;
     left: 176px;
-    right: 175px;
+    right: 176px;
     box-shadow: inset 0 1px 3px rgba(207, 218, 225, 0.42);
     overflow: hidden;  /* Добавьте это свойство, чтобы скрывать содержимое, выходящее за пределы */
 }
@@ -37,13 +37,49 @@
 .input-area {
     background: #e4eaee;
     padding: 6px;
-    overflow: hidden;
+    overflow: auto;
     position: absolute;
-    left: 0;
+    left: 176px; /* Ширина профиля (если она больше, увеличьте значение) */
     right: 0;
     bottom: 0;
     border-top: 1px solid #cfdae1;
     height: 50px;  /* Установите желаемую высоту input-area */
+}
+.message-element {
+  background-color: #f4f4f4;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+  .message-list {
+    padding-left: 176px; /* Ширина профиля (если она больше, увеличьте значение) */
+  }
+.strong-li {
+  color: #555;
+}
+
+/* li br {
+  display: none;
+} */
+.logout-button {
+    display: block;
+    width: 70%;
+    padding: 5px;
+    font-size: 16px;
+    text-align: center;
+    background-color: #e74c3c;  /* Цвет фона кнопки */
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    margin-top: 300px;  /* Отступ сверху */
+    margin-left: 20px;  /* Отступ сверху */
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background-color: #c0392b;  /* Цвет фона кнопки при наведении */
 }
 
     </style>
@@ -57,18 +93,19 @@
       </div>
       <div class="window-area"> <!-- Левая область с доступными чатами -->
         <div class="conversation-list">
-          <ul class="">
+          <ul class="chats">
             {% for i in chat %}
-              <li class="item active"><a href="/?chat_id={{i.id}}"><i class="fa-solid fa-users"></i><span>{{i.title}}</span></a></li>
+              <li id="{{i.id}}" class="item active list-element"><a href="/?chat_id={{i.id}}"><i class="fa-solid fa-users"></i><span>{{i.title}}</span></a></li>
             {% endfor %}
           </ul>
+          <a class="logout-button" href="{% url 'logout' %}">Выйти из профиля</a>
           <div class="my-account"> <!-- Левая область, но она уже про аккаунт пользователя -->
             <div class="image">
-              <img src="https://secure.gravatar.com/avatar/de76e03aa6b5b0bf675c1e8a990da52f?s=64">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Anonymous.svg/1200px-Anonymous.svg.png">
               <i class="fa fa-circle" aria-hidden="true"></i>
             </div>
             <div class="name">
-              <span>dearsadnezz</span>
+              <span>{{ name }}</span>
               <i class="fa fa-angle-down" aria-hidden="true"></i>
               <span class="availability">В сети</span> <!-- Отвечает за онлайн пользователя -->
             </div>
@@ -76,18 +113,7 @@
         </div>
         <div id="chat-container" class="chat-area"> <!-- Область с чатом, если добавлять сообщения, то добавится скролбар и можно будет пролистывать эту область -->
           <div class="chat-list" id="chat-list">
-            <ul>
-              {% for z in messages %}
-                <li class="me"> <!-- Тут обрати внимание, с этого момента начинается само сообщение пользователя -->
-                  <div class="name">
-                    <span class="">{{z.user.first_name}}</span>
-                  </div>
-                  <div class="message">
-                    <p>{{z.content}}</p>
-                      <span class="msg-time">{{ z.timestamp|date:"Y-m-d H:i:s" }}</span>
-                  </div>
-                </li> <!-- На этом моменте оно заканчивается -->
-              {% endfor %}
+            <ul class="message-list">
             </ul>
           </div>
         </div>
@@ -95,21 +121,28 @@
             {% csrf_token %}
             <div class="input-area"> <!-- Область с вводом сообщения, ниже также есть иконки для загрузки смайликов и тд -->
               <div class="input-wrapper">
-                {{form.as_p}}
+                <input
+              type="text"
+              id = "input"
+              name = "mess"
+              placeholder="Введите сообщение"
+              autocomplete="off"
+              value="">
+              <span id="suggestion"></span>
                 <i class="fa fa-smile-o"></i>
                 <i class="fa fa-paperclip"></i>
               </div>
-              <button type="submit" value="Submit" class="send-btn">Submit</button>
+                <button type="submit" value="Submit" class="send-btn">
+                    <img src="/static/send.png" alt="Отправить" style="width: 20px; height: 20px;">
+                </button>
           </div>
           </form>
         <div class="right-tabs"> <!-- Правая панель с пользователями в чате, даже показывается их онлайн -->
           <ul class="tabs-container">
             <li class="active">
               <ul class="member-list">
-                <li><span class="status online"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
-                <li><span class="status online"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
-                <li><span class="status offline"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
-                <li><span class="status offline"><i class="fa fa-circle-o"></i></span><span>имя</span></li>
+                <li><span class="status online"><i class="fa-solid fa-users"></i></span><span>{{usrs}} </span><span>Уникальных пользователей</span></li>
+                <li><span class="status online"><i class="fa-regular fa-message"></i></span><span>{{ms}} </span><span>Сообщений отправлено</span></li>
               </ul>
             </li>
           </ul>
@@ -117,34 +150,56 @@
       </div>
     </div>
   </body>
+<script src="/static/correct.js"></script>
 <script>
-    const chatList = document.getElementById('chat-list');
-    chatList.innerHTML = '';
-    // Открытие SSE-соединения
-    const eventSource = new EventSource('/get_new_messages/');
-    // Обработка событий от SSE
-    eventSource.onmessage = function (event) {
-        const newMessage = JSON.parse(event.data);
-        // Создание нового элемента сообщения
-        const messageElement = document.createElement('li');
-        messageElement.className = 'me';
+let chat = document.querySelector('.message-list')
 
-        const nameElement = document.createElement('div');
-        nameElement.className = 'name';
-        nameElement.innerHTML = `<span>${newMessage.user.first_name}</span>`;
+let dialog_length = 0
 
-        const messageContentElement = document.createElement('div');
-        messageContentElement.className = 'message';
-        messageContentElement.innerHTML = `<p>${newMessage.content}</p><span class="msg-time">${newMessage.timestamp}</span>`;
+let render = (data) => {
+  chat.innerHTML = '';
+  data.forEach((item) => {
+    chat.innerHTML += item;
+  })
+}
 
-        messageElement.appendChild(nameElement);
-        messageElement.appendChild(messageContentElement);
+let create_message_list = (data) => {
+  const render_messages = data.data.map((item) => {
+    item = `<li class="message-element">
+              <strong class="strong-li">Автор: </strong> ${item.user}
+              <br>
+              <strong class="strong-li">Время: </strong> ${item.timestamp}
+              <br>
+              <strong class="strong-li">Содержание: </strong> ${item.content}
+            </li>`
+    return item
+  })
+  render(render_messages)
+}
 
-        // Добавление нового сообщения в список
-        chatList.appendChild(messageElement);
-    };
+let get_messages = () => {
+  let parametr = window.location.href.toString()
+  let indexid = parametr.indexOf('?chat_id=')
+  let x = parametr.slice(indexid)
+  fetch(`http://127.0.0.1:8000/get_messages/${x}`)
+  .then((response) => response.text())
+  .then((response) => {
+    let last_messages = JSON.parse(response)
+    if (last_messages.data.length != dialog_length) {
+      messages = last_messages
+      dialog_length = last_messages.data.length
+      create_message_list(messages)
+    }
+  })
+}
+get_messages()
+setInterval(get_messages, 3000)
+
+// .then((response) => response.json())
+// .then((response) => {console.log(response)})
+
+
 </script>
-
 
 
 

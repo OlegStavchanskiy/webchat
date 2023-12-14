@@ -23,5 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('post_message/', views.post_message, name='post_message'),
-    path('get_new_messages/', views.get_new_messages, name='get_new_messages'),
+    path('get_messages/', views.get_messages, name='get_messages'),
+    path('register/', views.registerPage, name='register'),
+    path('logout/', views.doLogout, name='logout'),
 ]
